@@ -12,6 +12,7 @@ import com.newnop.tasktracker.repository.TaskRepository;
 import com.newnop.tasktracker.repository.TaskSpecifications;
 import com.newnop.tasktracker.repository.UserRepository;
 import com.newnop.tasktracker.service.TaskService;
+import com.newnop.tasktracker.websocket.TaskNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
+    private final TaskNotificationService notificationService;
 
     @Override
     @Transactional
@@ -33,7 +35,9 @@ public class TaskServiceImpl implements TaskService {
         User user = findUser(username);
         Task task = taskMapper.toEntity(request);
         task.setUser(user);
-        return taskMapper.toResponse(taskRepository.save(task));
+        TaskResponse response = taskMapper.toResponse(taskRepository.save(task));
+        notificationService.notifyTaskCreated(response);
+        return response;
     }
 
     @Override
@@ -60,7 +64,9 @@ public class TaskServiceImpl implements TaskService {
         Task task = findTask(id);
         validateAccess(task, username, isAdmin);
         taskMapper.updateEntity(task, request);
-        return taskMapper.toResponse(taskRepository.save(task));
+        TaskResponse response = taskMapper.toResponse(taskRepository.save(task));
+        notificationService.notifyTaskUpdated(response);
+        return response;
     }
 
     @Override
@@ -69,6 +75,7 @@ public class TaskServiceImpl implements TaskService {
         Task task = findTask(id);
         validateAccess(task, username, isAdmin);
         taskRepository.delete(task);
+        notificationService.notifyTaskDeleted(id);
     }
 
     private User findUser(String username) {
