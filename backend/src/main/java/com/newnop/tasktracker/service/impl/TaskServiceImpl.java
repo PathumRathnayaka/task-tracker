@@ -1,6 +1,7 @@
 package com.newnop.tasktracker.service.impl;
 
 import com.newnop.tasktracker.dto.request.TaskRequest;
+import com.newnop.tasktracker.dto.response.PagedResponse;
 import com.newnop.tasktracker.dto.response.TaskResponse;
 import com.newnop.tasktracker.entity.Task;
 import com.newnop.tasktracker.entity.User;
@@ -8,13 +9,15 @@ import com.newnop.tasktracker.exception.ResourceNotFoundException;
 import com.newnop.tasktracker.exception.UnauthorizedException;
 import com.newnop.tasktracker.mapper.TaskMapper;
 import com.newnop.tasktracker.repository.TaskRepository;
+import com.newnop.tasktracker.repository.TaskSpecifications;
 import com.newnop.tasktracker.repository.UserRepository;
 import com.newnop.tasktracker.service.TaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -43,11 +46,12 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TaskResponse> getAllTasksForUser(String username) {
-        User user = findUser(username);
-        return taskRepository.findByUserId(user.getId()).stream()
-                .map(taskMapper::toResponse)
-                .toList();
+    public PagedResponse<TaskResponse> getTasks(Task.TaskStatus status, Long ownerId, Pageable pageable,
+                                                String username, boolean isAdmin) {
+        Long effectiveOwnerId = isAdmin ? ownerId : findUser(username).getId();
+        Specification<Task> spec = TaskSpecifications.withFilters(status, effectiveOwnerId);
+        Page<TaskResponse> page = taskRepository.findAll(spec, pageable).map(taskMapper::toResponse);
+        return PagedResponse.from(page);
     }
 
     @Override

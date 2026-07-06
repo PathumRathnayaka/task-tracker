@@ -1,9 +1,10 @@
 package com.newnop.tasktracker.service;
 
 import com.newnop.tasktracker.dto.request.TaskRequest;
+import com.newnop.tasktracker.dto.response.PagedResponse;
 import com.newnop.tasktracker.dto.response.TaskResponse;
-
-import java.util.List;
+import com.newnop.tasktracker.entity.Task;
+import org.springframework.data.domain.Pageable;
 
 public interface TaskService {
 
@@ -11,7 +12,8 @@ public interface TaskService {
 
     TaskResponse getTaskById(Long id, String username);
 
-    List<TaskResponse> getAllTasksForUser(String username);
+    PagedResponse<TaskResponse> getTasks(Task.TaskStatus status, Long ownerId, Pageable pageable,
+                                         String username, boolean isAdmin);
 
     TaskResponse updateTask(Long id, TaskRequest request, String username);
 
