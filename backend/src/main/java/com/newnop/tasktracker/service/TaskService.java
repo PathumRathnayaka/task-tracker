@@ -10,12 +10,12 @@ public interface TaskService {
 
     TaskResponse createTask(TaskRequest request, String username);
 
-    TaskResponse getTaskById(Long id, String username);
+    TaskResponse getTaskById(Long id, String username, boolean isAdmin);
 
     PagedResponse<TaskResponse> getTasks(Task.TaskStatus status, Long ownerId, Pageable pageable,
                                          String username, boolean isAdmin);
 
-    TaskResponse updateTask(Long id, TaskRequest request, String username);
+    TaskResponse updateTask(Long id, TaskRequest request, String username, boolean isAdmin);
 
-    void deleteTask(Long id, String username);
+    void deleteTask(Long id, String username, boolean isAdmin);
 }

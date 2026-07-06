@@ -38,9 +38,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public TaskResponse getTaskById(Long id, String username) {
+    public TaskResponse getTaskById(Long id, String username, boolean isAdmin) {
         Task task = findTask(id);
-        validateOwnership(task, username);
+        validateAccess(task, username, isAdmin);
         return taskMapper.toResponse(task);
     }
 
@@ -56,18 +56,18 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public TaskResponse updateTask(Long id, TaskRequest request, String username) {
+    public TaskResponse updateTask(Long id, TaskRequest request, String username, boolean isAdmin) {
         Task task = findTask(id);
-        validateOwnership(task, username);
+        validateAccess(task, username, isAdmin);
         taskMapper.updateEntity(task, request);
         return taskMapper.toResponse(taskRepository.save(task));
     }
 
     @Override
     @Transactional
-    public void deleteTask(Long id, String username) {
+    public void deleteTask(Long id, String username, boolean isAdmin) {
         Task task = findTask(id);
-        validateOwnership(task, username);
+        validateAccess(task, username, isAdmin);
         taskRepository.delete(task);
     }
 
@@ -81,7 +81,10 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
     }
 
-    private void validateOwnership(Task task, String username) {
+    private void validateAccess(Task task, String username, boolean isAdmin) {
+        if (isAdmin) {
+            return;
+        }
         if (!task.getUser().getUsername().equals(username)) {
             throw new UnauthorizedException("You do not have permission to access this task");
         }

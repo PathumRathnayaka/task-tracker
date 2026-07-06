@@ -37,7 +37,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskResponse>> getTask(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        TaskResponse response = taskService.getTaskById(id, userDetails.getUsername());
+        TaskResponse response = taskService.getTaskById(id, userDetails.getUsername(), hasAdminRole(userDetails));
         return ResponseEntity.ok(ApiResponse.success("Task retrieved", response));
     }
 
@@ -58,7 +58,7 @@ public class TaskController {
             @PathVariable Long id,
             @Valid @RequestBody TaskRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        TaskResponse response = taskService.updateTask(id, request, userDetails.getUsername());
+        TaskResponse response = taskService.updateTask(id, request, userDetails.getUsername(), hasAdminRole(userDetails));
         return ResponseEntity.ok(ApiResponse.success("Task updated", response));
     }
 
@@ -66,7 +66,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<Void>> deleteTask(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        taskService.deleteTask(id, userDetails.getUsername());
+        taskService.deleteTask(id, userDetails.getUsername(), hasAdminRole(userDetails));
         return ResponseEntity.ok(ApiResponse.success("Task deleted", null));
     }
 
