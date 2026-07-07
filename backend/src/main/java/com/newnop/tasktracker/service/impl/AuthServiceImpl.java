@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,11 +72,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private AuthResponse buildAuthResponse(User user, String token) {
+        Set<String> roles = user.getRoles() == null ? Set.of()
+                : user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         return AuthResponse.builder()
                 .accessToken(token)
                 .tokenType("Bearer")
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .roles(roles)
                 .build();
     }
 }
