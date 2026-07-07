@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { Modal } from '../components/ui/Modal'
+import { useToast } from '../components/ui/toast/useToast'
 import { Pagination } from '../components/tasks/Pagination'
 import { TaskCard } from '../components/tasks/TaskCard'
 import { TaskFilters } from '../components/tasks/TaskFilters'
@@ -16,6 +17,7 @@ import type { Task, TaskPayload, UserSummary } from '../types'
 
 export function TasksPage() {
   const { isAdmin } = useAuth()
+  const toast = useToast()
   const {
     tasks,
     page,
@@ -38,7 +40,6 @@ export function TasksPage() {
   const [editing, setEditing] = useState<Task | null>(null)
   const [deleting, setDeleting] = useState<Task | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isAdmin) return
@@ -59,18 +60,19 @@ export function TasksPage() {
 
   const submit = async (payload: TaskPayload) => {
     setSubmitting(true)
-    setActionError(null)
     try {
       if (editing) {
         await updateTask(editing.id, payload)
+        toast.success('Task updated')
       } else {
         await createTask(payload)
+        toast.success('Task created')
       }
       setFormOpen(false)
       setEditing(null)
       await reload()
     } catch (err) {
-      setActionError(extractErrorMessage(err, 'Unable to save task'))
+      toast.error(extractErrorMessage(err, 'Unable to save task'))
     } finally {
       setSubmitting(false)
     }
@@ -81,10 +83,11 @@ export function TasksPage() {
     setSubmitting(true)
     try {
       await deleteTask(deleting.id)
+      toast.success('Task deleted')
       setDeleting(null)
       await reload()
     } catch (err) {
-      setActionError(extractErrorMessage(err, 'Unable to delete task'))
+      toast.error(extractErrorMessage(err, 'Unable to delete task'))
     } finally {
       setSubmitting(false)
     }
@@ -127,12 +130,6 @@ export function TasksPage() {
           onOwnerChange={isAdmin ? changeOwner : undefined}
         />
       </div>
-
-      {actionError && (
-        <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-          {actionError}
-        </div>
-      )}
 
       {loading ? (
         <p className="py-12 text-center text-sm text-slate-400">

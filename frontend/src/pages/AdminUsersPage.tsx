@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
+import { useToast } from '../components/ui/toast/useToast'
 import { deleteUser, getUsers } from '../features/admin/admin.api'
 import { useAuth } from '../features/auth/useAuth'
 import { extractErrorMessage } from '../lib/api'
@@ -9,6 +10,7 @@ import type { UserSummary } from '../types'
 
 export function AdminUsersPage() {
   const { user } = useAuth()
+  const toast = useToast()
   const [users, setUsers] = useState<UserSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -36,10 +38,11 @@ export function AdminUsersPage() {
     setSubmitting(true)
     try {
       await deleteUser(deleting.id)
+      toast.success('User deleted')
       setDeleting(null)
       await load()
     } catch (err) {
-      setError(extractErrorMessage(err, 'Unable to delete user'))
+      toast.error(extractErrorMessage(err, 'Unable to delete user'))
     } finally {
       setSubmitting(false)
     }
