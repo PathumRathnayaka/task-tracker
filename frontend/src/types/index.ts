@@ -25,6 +25,7 @@ export interface AuthResponse {
   tokenType: string
   username: string
   email: string
+  roles: string[]
 }
 
 export interface Task {

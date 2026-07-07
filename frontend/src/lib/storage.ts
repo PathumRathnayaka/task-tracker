@@ -6,6 +6,7 @@ const USER_KEY = 'tt.user'
 export interface StoredUser {
   username: string
   email: string
+  roles: string[]
 }
 
 export function getToken(): string | null {
@@ -26,7 +27,11 @@ export function saveSession(auth: AuthResponse): void {
   localStorage.setItem(TOKEN_KEY, auth.accessToken)
   localStorage.setItem(
     USER_KEY,
-    JSON.stringify({ username: auth.username, email: auth.email }),
+    JSON.stringify({
+      username: auth.username,
+      email: auth.email,
+      roles: auth.roles ?? [],
+    }),
   )
 }
 
