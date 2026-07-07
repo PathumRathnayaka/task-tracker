@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { AdminUsersPage } from './pages/AdminUsersPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { TasksPage } from './pages/TasksPage'
@@ -13,6 +14,9 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/tasks" element={<TasksPage />} />
+          <Route element={<ProtectedRoute adminOnly />}>
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+          </Route>
         </Route>
       </Route>
       <Route path="/" element={<Navigate to="/tasks" replace />} />

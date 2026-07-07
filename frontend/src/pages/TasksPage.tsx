@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { Modal } from '../components/ui/Modal'
@@ -6,30 +6,46 @@ import { Pagination } from '../components/tasks/Pagination'
 import { TaskCard } from '../components/tasks/TaskCard'
 import { TaskFilters } from '../components/tasks/TaskFilters'
 import { TaskForm } from '../components/tasks/TaskForm'
+import { getUsers } from '../features/admin/admin.api'
+import { useAuth } from '../features/auth/useAuth'
 import { createTask, deleteTask, updateTask } from '../features/tasks/tasks.api'
 import { useTasks } from '../features/tasks/useTasks'
+import { useTaskSocket } from '../features/tasks/useTaskSocket'
 import { extractErrorMessage } from '../lib/api'
-import type { Task, TaskPayload } from '../types'
+import type { Task, TaskPayload, UserSummary } from '../types'
 
 export function TasksPage() {
+  const { isAdmin } = useAuth()
   const {
     tasks,
     page,
     totalPages,
     totalElements,
     status,
+    ownerId,
     loading,
     error,
     setPage,
     changeStatus,
+    changeOwner,
     reload,
   } = useTasks()
 
+  const { connected } = useTaskSocket(reload)
+
+  const [owners, setOwners] = useState<UserSummary[]>([])
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Task | null>(null)
   const [deleting, setDeleting] = useState<Task | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isAdmin) return
+    getUsers()
+      .then(setOwners)
+      .catch(() => setOwners([]))
+  }, [isAdmin])
 
   const openCreate = () => {
     setEditing(null)
@@ -78,7 +94,23 @@ export function TasksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Your tasks</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold text-slate-900">
+              {isAdmin ? 'All tasks' : 'Your tasks'}
+            </h1>
+            <span
+              className={`inline-flex items-center gap-1.5 text-xs ${
+                connected ? 'text-green-600' : 'text-slate-400'
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  connected ? 'bg-green-500' : 'bg-slate-300'
+                }`}
+              />
+              {connected ? 'Live' : 'Offline'}
+            </span>
+          </div>
           <p className="mt-1 text-sm text-slate-500">
             {totalElements} {totalElements === 1 ? 'task' : 'tasks'} total
           </p>
@@ -87,7 +119,13 @@ export function TasksPage() {
       </div>
 
       <div className="flex items-center justify-between">
-        <TaskFilters status={status} onStatusChange={changeStatus} />
+        <TaskFilters
+          status={status}
+          onStatusChange={changeStatus}
+          owners={isAdmin ? owners : undefined}
+          ownerId={ownerId}
+          onOwnerChange={isAdmin ? changeOwner : undefined}
+        />
       </div>
 
       {actionError && (
