@@ -18,6 +18,20 @@ real-time updates.
 - Client and server-side validation.
 - Live task updates pushed over WebSocket.
 
+## Screenshots
+
+### Login
+
+![Login page](docs/images/login.PNG)
+
+### Task list
+
+![Task list with filtering and pagination](docs/images/task-list.PNG)
+
+### Admin — user management
+
+![Admin user management](docs/images/admin-users.PNG)
+
 ## Getting started
 
 ### Prerequisites
