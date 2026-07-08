@@ -75,6 +75,12 @@ cd frontend
 npm test
 ```
 
+## Continuous integration
+
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and
+pull request. It builds and tests the backend, and installs, lints, tests, and
+builds the frontend.
+
 ## Configuration
 
 Backend (`backend/.env`):
