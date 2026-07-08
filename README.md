@@ -59,6 +59,22 @@ npm run dev
 
 The app runs on `http://localhost:5173`.
 
+## Testing
+
+Backend (JUnit, Mockito, `@DataJpaTest`):
+
+```bash
+cd backend
+./mvnw test
+```
+
+Frontend (Vitest, React Testing Library):
+
+```bash
+cd frontend
+npm test
+```
+
 ## Configuration
 
 Backend (`backend/.env`):

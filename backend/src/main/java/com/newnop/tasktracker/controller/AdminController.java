@@ -4,7 +4,9 @@ import com.newnop.tasktracker.dto.response.ApiResponse;
 import com.newnop.tasktracker.dto.response.UserResponse;
 import com.newnop.tasktracker.entity.Role;
 import com.newnop.tasktracker.entity.User;
+import com.newnop.tasktracker.exception.BadRequestException;
 import com.newnop.tasktracker.exception.ResourceNotFoundException;
+import com.newnop.tasktracker.repository.TaskRepository;
 import com.newnop.tasktracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
@@ -38,6 +41,11 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User", "id", id);
+        }
+        long taskCount = taskRepository.countByUserId(id);
+        if (taskCount > 0) {
+            throw new BadRequestException(
+                    "This user still has " + taskCount + " task(s). Delete or reassign them before removing the user.");
         }
         userRepository.deleteById(id);
         return ResponseEntity.ok(ApiResponse.success("User deleted", null));
