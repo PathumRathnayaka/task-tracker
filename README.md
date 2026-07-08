@@ -116,3 +116,16 @@ Frontend (`frontend/.env`):
 
 Task changes are broadcast to `/topic/tasks/created`, `/topic/tasks/updated`,
 and `/topic/tasks/deleted`.
+
+## Postman
+
+A ready-to-use collection and environment live in `postman/`:
+
+- `TaskTracker.postman_collection.json`
+- `TaskTracker.postman_environment.json`
+
+Import both into Postman and select the **Task Tracker (Local)** environment.
+Run **Auth → Login as admin** (or **Register** then **Login**) first — the token
+is captured into the environment and reused by every other request. Creating a
+task stores its id, so the get, update, and delete requests work without any
+manual copying.
