@@ -37,6 +37,17 @@ cp .env.example .env      # adjust database credentials and JWT secret
 The API runs on `http://localhost:8080`. Swagger UI is available at
 `http://localhost:8080/swagger-ui.html`.
 
+On first startup the application seeds a default administrator so the
+admin-only features can be tried immediately:
+
+| Username | Password |
+| --- | --- |
+| `admin` | `Admin@12345` |
+
+Registration always creates regular users; the admin account is provisioned
+through this seed and can be overridden with the `ADMIN_*` environment
+variables. Change the password before deploying anywhere public.
+
 ### Frontend
 
 ```bash
@@ -58,6 +69,7 @@ Backend (`backend/.env`):
 | `DB_USERNAME` / `DB_PASSWORD` | Database credentials |
 | `JWT_SECRET` | Base64-encoded signing key |
 | `JWT_EXPIRATION_MS` | Token lifetime in milliseconds |
+| `ADMIN_USERNAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Seeded administrator account |
 | `APP_CORS_ALLOWED_ORIGINS` | Comma-separated allowed origins |
 
 Frontend (`frontend/.env`):
